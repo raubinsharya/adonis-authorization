@@ -20,35 +20,38 @@ export default class AdminController {
       .first()
     return role
   }
-  public async getRolePermissions({ request }: HttpContext) {
+  public async getRolePermissions({ request, response }: HttpContext) {
     const role = await Role.query()
       .where('id', request.param('id'))
       .select('id', 'slug', 'title')
       .first()
+    if (!role) return response.json({ errors: [{ message: 'Role Not Found!' }] })
     return Acl.role(role as RoleInterface).permissions()
   }
-  public async addRolePermissions({ request }: HttpContext) {
+  public async addRolePermissions({ request, response }: HttpContext) {
     const payload = await request.validateUsing(addRolePermissionValidator)
     const role = (await Role.query().where('id', request.param('id')).first()) as RoleInterface
+    if (!role) return response.json({ errors: [{ message: 'Role Not Found!' }] })
     await Acl.role(role).assignAll(payload.permissions)
     return await Acl.role(role).permissions()
   }
-  public async replaceRolePermissions({ request }: HttpContext) {
+  public async replaceRolePermissions({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(addRolePermissionValidator)
+    const role = (await Acl.role()
+      .query()
+      .where('id', request.param('id'))
+      .first()) as RoleInterface
+    if (!role) return response.json({ errors: [{ message: 'Role Not Found!' }] })
+    await Acl.role(role).sync(payload.permissions)
+    return await Acl.role(role).permissions()
+  }
+  public async deleteRolePermissions({ request, response }: HttpContext) {
     const payload = await request.validateUsing(addRolePermissionValidator)
     const role = (await Acl.role()
       .query()
       .where('slug', request.param('id'))
       .first()) as RoleInterface
-    await Acl.role(role).flush()
-    await Acl.role(role).assignAll(payload.permissions)
-    return await Acl.role(role).permissions()
-  }
-  public async deleteRolePermissions({ request }: HttpContext) {
-    const payload = await request.validateUsing(addRolePermissionValidator)
-    const role = (await Acl.role()
-      .query()
-      .where('slug', request.param('id'))
-      .first()) as RoleInterface
+    if (!role) return response.json({ errors: [{ message: 'Role Not Found!' }] })
     await Acl.role(role).revokeAllPermissions(payload.permissions)
     return await Acl.role(role).permissions()
   }
@@ -90,22 +93,56 @@ export default class AdminController {
   public async getUser({ request }: HttpContext) {
     return await User.find(request.param('id'))
   }
-  public async getUserRoles({ request }: HttpContext) {
+  public async getUserRoles({ request, response }: HttpContext) {
     const user = (await User.find(request.param('id'))) as AclModel
+    if (!user) return response.json({ errors: [{ message: 'User Not Found!' }] })
     return Acl.model(user).roles()
   }
-  public async getUserPermissions({ request }: HttpContext) {
+  public async getUserPermissions({ request, response }: HttpContext) {
     const user = (await User.find(request.param('id'))) as AclModel
+    if (!user) return response.json({ errors: [{ message: 'User Not Found!' }] })
     return Acl.model(user).permissions()
   }
-  public async addUserRoles({ request }: HttpContext) {
+  public async addUserRoles({ request, response }: HttpContext) {
     const payload = await request.validateUsing(deleteRoleValidator)
     const user = (await User.find(request.param('id'))) as AclModel
-    return await Acl.model(user).assignAllRoles(...payload.roles)
+    if (!user) return response.json({ errors: [{ message: 'User Not Found!' }] })
+    await Acl.model(user).assignAllRoles(...payload.roles)
+    return await Acl.model(user).roles()
   }
-  public async addUserPermissions({ request }: HttpContext) {
+  public async updateUserRoles({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(deleteRoleValidator)
+    const user = (await User.find(request.param('id'))) as AclModel
+    if (!user) return response.json({ errors: [{ message: 'User Not Found!' }] })
+    await Acl.model(user).syncRoles(payload.roles)
+    return await Acl.model(user).roles()
+  }
+  public async addUserPermissions({ request, response }: HttpContext) {
     const payload = await request.validateUsing(deletePermissionsValidator)
     const user = (await User.find(request.param('id'))) as AclModel
+    if (!user) return response.json({ errors: [{ message: 'User Not Found!' }] })
     return await Acl.model(user).assignDirectAllPermissions(payload.permissions)
+  }
+
+  public async updateUserPermissions({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(deletePermissionsValidator)
+    const user = (await User.find(request.param('id'))) as AclModel
+    if (!user) return response.json({ errors: [{ message: 'User Not Found!' }] })
+    await Acl.model(user).syncPermissions(payload.permissions)
+    return await Acl.model(user).permissions()
+  }
+  public async deleteUserRoles({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(deleteRoleValidator)
+    const user = (await User.find(request.param('id'))) as AclModel
+    if (!user) return response.json({ errors: [{ message: 'User Not Found!' }] })
+    await Acl.model(user).revokeAllRoles(...payload.roles)
+    return await Acl.model(user).roles()
+  }
+  public async deleteUserPermissions({ request, response }: HttpContext) {
+    const payload = await request.validateUsing(deletePermissionsValidator)
+    const user = (await User.find(request.param('id'))) as AclModel
+    if (!user) return response.json({ errors: [{ message: 'User Not Found!' }] })
+    await Acl.model(user).revokeAllPermissions(payload.permissions)
+    return await Acl.model(user).permissions()
   }
 }

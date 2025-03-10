@@ -1,7 +1,7 @@
 export const forbiddenError = {
   errors: [
     {
-      message: 'Operation not permitted!',
+      message: 'Authorization failed!',
     },
   ],
 }
