@@ -1,9 +1,12 @@
+import User from '#models/user'
 import { addRolePermissionValidator } from '#validators/acl/add_role_permissions_validator'
 import { createPermissionValidator } from '#validators/acl/create_permission_validator'
-import { createRoleValidator } from '#validators/acl/create_role_validator'
+import { createRoleValidator } from '#validators/acl/create_roles_validator'
+import { deletePermissionsValidator } from '#validators/acl/delete_permissions_validator'
+import { deleteRoleValidator } from '#validators/acl/delete_roles_validator'
 import type { HttpContext } from '@adonisjs/core/http'
 import { Acl, Permission, Role } from '@holoyan/adonisjs-permissions'
-import { RoleInterface } from '@holoyan/adonisjs-permissions/types'
+import { AclModel, RoleInterface } from '@holoyan/adonisjs-permissions/types'
 
 export default class AdminController {
   public async getAllRole({}: HttpContext) {
@@ -26,26 +29,37 @@ export default class AdminController {
   }
   public async addRolePermissions({ request }: HttpContext) {
     const payload = await request.validateUsing(addRolePermissionValidator)
-    const role = (await Acl.role().query().where('slug', payload.role).first()) as RoleInterface
+    const role = (await Role.query().where('id', request.param('id')).first()) as RoleInterface
     await Acl.role(role).assignAll(payload.permissions)
     return await Acl.role(role).permissions()
   }
   public async replaceRolePermissions({ request }: HttpContext) {
     const payload = await request.validateUsing(addRolePermissionValidator)
-    const role = (await Acl.role().query().where('slug', payload.role).first()) as RoleInterface
+    const role = (await Acl.role()
+      .query()
+      .where('slug', request.param('id'))
+      .first()) as RoleInterface
     await Acl.role(role).flush()
     await Acl.role(role).assignAll(payload.permissions)
     return await Acl.role(role).permissions()
   }
   public async deleteRolePermissions({ request }: HttpContext) {
     const payload = await request.validateUsing(addRolePermissionValidator)
-    const role = (await Acl.role().query().where('slug', payload.role).first()) as RoleInterface
+    const role = (await Acl.role()
+      .query()
+      .where('slug', request.param('id'))
+      .first()) as RoleInterface
     await Acl.role(role).revokeAllPermissions(payload.permissions)
     return await Acl.role(role).permissions()
   }
-  public async createRole({ request }: HttpContext) {
+  public async createRoles({ request }: HttpContext) {
     const payload = await request.validateUsing(createRoleValidator)
-    return Acl.role().create(payload)
+    return Role.fetchOrCreateMany('slug', payload.roles)
+  }
+  public async deleteRoles({ request }: HttpContext) {
+    const payload = await request.validateUsing(deleteRoleValidator)
+    await Role.query().delete().whereIn('slug', payload.roles)
+    return await Role.query().select(['slug', 'title'])
   }
 
   public async getAllPermissions({}: HttpContext) {
@@ -60,8 +74,38 @@ export default class AdminController {
     return role
   }
 
-  public async createPermission({ request }: HttpContext) {
+  public async createPermissions({ request }: HttpContext) {
     const payload = await request.validateUsing(createPermissionValidator)
-    return Acl.permission().create(payload)
+    return Permission.fetchOrCreateMany('slug', payload.permissions)
+  }
+  public async deletePermissions({ request }: HttpContext) {
+    const payload = await request.validateUsing(deletePermissionsValidator)
+    await Permission.query().delete().whereIn('slug', payload.permissions)
+    return await Permission.query().select(['slug', 'title'])
+  }
+
+  public async getUsers() {
+    return await User.all()
+  }
+  public async getUser({ request }: HttpContext) {
+    return await User.find(request.param('id'))
+  }
+  public async getUserRoles({ request }: HttpContext) {
+    const user = (await User.find(request.param('id'))) as AclModel
+    return Acl.model(user).roles()
+  }
+  public async getUserPermissions({ request }: HttpContext) {
+    const user = (await User.find(request.param('id'))) as AclModel
+    return Acl.model(user).permissions()
+  }
+  public async addUserRoles({ request }: HttpContext) {
+    const payload = await request.validateUsing(deleteRoleValidator)
+    const user = (await User.find(request.param('id'))) as AclModel
+    return await Acl.model(user).assignAllRoles(...payload.roles)
+  }
+  public async addUserPermissions({ request }: HttpContext) {
+    const payload = await request.validateUsing(deletePermissionsValidator)
+    const user = (await User.find(request.param('id'))) as AclModel
+    return await Acl.model(user).assignDirectAllPermissions(payload.permissions)
   }
 }

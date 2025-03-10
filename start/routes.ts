@@ -33,8 +33,11 @@ router
           .delete('roles/:id/permissions', [AdminController, 'deleteRolePermissions'])
           .use(middleware.acl({ permissions: ['add_role_permissions'] }))
         router
-          .post('role', [AdminController, 'createRole'])
-          .use(middleware.acl({ permissions: ['create_role'] }))
+          .post('roles', [AdminController, 'createRoles'])
+          .use(middleware.acl({ permissions: ['create_roles'] }))
+        router
+          .delete('roles', [AdminController, 'deleteRoles'])
+          .use(middleware.acl({ permissions: ['delete_roles'] }))
         // Permission
         router
           .get('permissions', [AdminController, 'getAllPermissions'])
@@ -43,8 +46,26 @@ router
           .get('permissions/:id', [AdminController, 'getPermission'])
           .use(middleware.acl({ permissions: ['view_permission'] }))
         router
-          .post('permission', [AdminController, 'createPermission'])
+          .post('permissions', [AdminController, 'createPermissions'])
           .use(middleware.acl({ permissions: ['create_permission'] }))
+        router
+          .delete('permissions', [AdminController, 'deletePermissions'])
+          .use(middleware.acl({ permissions: ['delete_permissions'] }))
+        router
+          .get('users', [AdminController, 'getUsers'])
+          .use(middleware.acl({ permissions: ['view_users'] }))
+        router
+          .get('users/:id', [AdminController, 'getUser'])
+          .use(middleware.acl({ permissions: ['view_user'] }))
+        router
+          .get('users/:id/roles', [AdminController, 'getUserRoles'])
+          .use(middleware.acl({ permissions: ['view_user_roles'] }))
+        router
+          .post('users/:id/roles', [AdminController, 'addUserRoles'])
+          .use(middleware.acl({ permissions: ['add_user_roles'] }))
+        router
+          .get('users/:id/permissions', [AdminController, 'getUserPermissions'])
+          .use(middleware.acl({ permissions: ['add_user_permissions'] }))
       })
       .prefix('admin')
       .use([middleware.auth(), middleware.acl({ roles: ['role_admin'] })])

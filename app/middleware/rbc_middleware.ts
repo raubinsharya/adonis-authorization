@@ -15,15 +15,14 @@ export default class UserScopeMiddleware {
     next: NextFn,
     options: { permissions?: Array<string>; roles?: Array<string> } = {}
   ) {
-    
     if (!ctx.auth?.user) return ctx.response.unauthorized(unauthError)
     if (await ctx.auth?.user?.hasRole('root_admin')) return await next()
 
-    if (Array.isArray(options.roles)) {
+    if (Array.isArray(options.roles) && options.roles.length > 0) {
       const hasAllRoles = await ctx.auth.user!.hasAllRoles(...options.roles)
       if (!hasAllRoles) return ctx.response.forbidden(forbiddenError)
     }
-    if (Array.isArray(options.permissions)) {
+    if (Array.isArray(options.permissions) && options.permissions.length > 0) {
       const hasAllPermissions = await ctx.auth.user!.hasAllPermissions(options.permissions)
       if (!hasAllPermissions) return ctx.response.forbidden(forbiddenError)
     }

@@ -1,8 +1,8 @@
 import vine from '@vinejs/vine'
 
-export const createPermissionValidator = vine.compile(
+export const createRoleValidator = vine.compile(
   vine.object({
-    permissions: vine
+    roles: vine
       .array(
         vine.object({
           slug: vine.string(),

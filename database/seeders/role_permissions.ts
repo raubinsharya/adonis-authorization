@@ -2,7 +2,7 @@ import { BaseSeeder } from '@adonisjs/lucid/seeders'
 import { Acl, Role } from '@holoyan/adonisjs-permissions'
 import { RoleInterface } from '@holoyan/adonisjs-permissions/types'
 
-export default class UserSeeder extends BaseSeeder {
+export default class RolePermissionSeeder extends BaseSeeder {
   async run() {
     // const permissions: Array<string> = ['view_role', 'view_roles']
     // const admin = (await Role.find(2)) as RoleInterface

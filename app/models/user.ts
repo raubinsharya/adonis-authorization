@@ -1,11 +1,11 @@
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column, computed } from '@adonisjs/lucid/orm'
+import { BaseModel, beforeDelete, column, computed } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import { hasPermissions, MorphMap } from '@holoyan/adonisjs-permissions'
-import { AclModelInterface } from '@holoyan/adonisjs-permissions/types'
+import { AclModelInterface, RoleModel } from '@holoyan/adonisjs-permissions/types'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email', 'mobile'],
