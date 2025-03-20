@@ -16,26 +16,33 @@ export default class AuthController {
     response.json({ message: 'User registration sucessful! verification email is sent' })
     emitter.emit('user:registered', user)
   }
-  public async login({ request }: HttpContext) {
+  public async login({ request, response }: HttpContext) {
     const payload = await request.validateUsing(loginValidator)
     const user = await User.verifyCredentials(payload.userName, payload.password)
-    if(user.status === 'unauth') return {
+    if (user.status === 'unauth')
+      return response.status(403).json({
         errors: [
-            {
-                message: 'Account Not verified!'
-            }
-        ]
-    }
-    if(user.status !== 'active') return {
+          {
+            message: 'Account Not verified!',
+          },
+        ],
+      })
+    if (user.status !== 'active')
+      return response.status(403).json({
         errors: [
-            {
-                message: 'Something Wrong with account, please contact admin!'
-            }
-        ]
-    }
+          {
+            message: 'Something wrong with account, please contact admin',
+          },
+        ],
+      })
     const token = await User.accessTokens.create(user, ['*'], { expiresIn: '24hr' })
     return {
       token: token.value!.release(),
+      user: user
     }
+  }
+
+  public async getProfile({ auth }: HttpContext) {
+    return auth.user
   }
 }

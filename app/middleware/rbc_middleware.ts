@@ -18,10 +18,13 @@ export default class UserScopeMiddleware {
     if (!ctx.auth?.user) return ctx.response.unauthorized(unauthError)
     if (await ctx.auth?.user?.hasRole('root_admin')) return await next()
 
+    // roles
     if (Array.isArray(options.roles) && options.roles.length > 0) {
       const hasAllRoles = await ctx.auth.user!.hasAllRoles(...options.roles)
-      if (!hasAllRoles) return ctx.response.forbidden(forbiddenError)
+      const isActive = (await ctx.auth.user.roles()).every((role) => !!role.allowed)
+      if (!hasAllRoles || !isActive) return ctx.response.forbidden(forbiddenError)
     }
+    // permissions
     if (Array.isArray(options.permissions) && options.permissions.length > 0) {
       const hasAllPermissions = await ctx.auth.user!.hasAllPermissions(options.permissions)
       if (!hasAllPermissions) return ctx.response.forbidden(forbiddenError)

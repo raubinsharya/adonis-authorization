@@ -10,6 +10,14 @@ router
     })
     router.post('signup', [AuthController, 'create'])
     router.post('login', [AuthController, 'login'])
+
+    router
+      .group(() => {
+        router.get('profile', [AuthController, 'getProfile'])
+      })
+      .prefix('user')
+      .use(middleware.auth())
+
     // ACL
     router
       .group(() => {
@@ -38,6 +46,9 @@ router
         router
           .delete('roles', [AdminController, 'deleteRoles'])
           .use(middleware.acl({ permissions: ['delete_roles'] }))
+        router
+          .patch('roles', [AdminController, 'disableRoles'])
+          .use(middleware.acl({ permissions: ['disable_roles'] }))
         // Permission
         router
           .get('permissions', [AdminController, 'getAllPermissions'])
@@ -51,6 +62,9 @@ router
         router
           .delete('permissions', [AdminController, 'deletePermissions'])
           .use(middleware.acl({ permissions: ['delete_permissions'] }))
+        router
+          .patch('permissions', [AdminController, 'disablePermissions'])
+          .use(middleware.acl({ permissions: ['disable_permissions'] }))
         // Users
         router
           .get('users', [AdminController, 'getUsers'])
@@ -81,6 +95,6 @@ router
           .use(middleware.acl({ permissions: ['delete_user_permissions'] }))
       })
       .prefix('admin')
-      .use([middleware.auth(), middleware.acl({ roles: ['role_admin'] })])
+      .use([middleware.auth()])
   })
   .prefix('api/v1')

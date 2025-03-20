@@ -53,7 +53,7 @@ export default class User
 
   @computed()
   public get fullName(): string {
-    return `${this.firstName} ${this.middleName} ${this.lastName}`
+    return [this.firstName, this.middleName, this.lastName].filter(Boolean).join(' ')
   }
 
   static accessTokens = DbAccessTokensProvider.forModel(User)

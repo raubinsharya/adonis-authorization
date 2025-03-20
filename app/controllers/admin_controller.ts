@@ -7,9 +7,13 @@ import { deleteRoleValidator } from '#validators/acl/delete_roles_validator'
 import type { HttpContext } from '@adonisjs/core/http'
 import { Acl, Permission, Role } from '@holoyan/adonisjs-permissions'
 import { AclModel, RoleInterface } from '@holoyan/adonisjs-permissions/types'
+import db from '@adonisjs/lucid/services/db'
+import { disableRoleValidator } from '#validators/acl/roles_status_validator'
+import { disablePermissionsValidator } from '#validators/acl/permissions_status_validator'
+
 
 export default class AdminController {
-  public async getAllRole({}: HttpContext) {
+  public async getAllRole() {
     const roles = await Role.query().select('id', 'slug', 'title')
     return roles
   }
@@ -65,6 +69,17 @@ export default class AdminController {
     return await Role.query().select(['slug', 'title'])
   }
 
+  public async disableRoles({ request }: HttpContext) {
+    const { roles } = await request.validateUsing(disableRoleValidator)
+    await db.rawQuery(`
+      UPDATE roles AS r
+      SET allowed = u.allowed
+      FROM (VALUES ${roles.map((r) => `('${r.role}', ${r.status})`).join(', ')}) AS u(slug, allowed)
+      WHERE r.slug = u.slug
+    `)
+    return await Role.all()
+  }
+
   public async getAllPermissions({}: HttpContext) {
     const roles = await Permission.query().select('id', 'slug', 'title')
     return roles
@@ -85,6 +100,17 @@ export default class AdminController {
     const payload = await request.validateUsing(deletePermissionsValidator)
     await Permission.query().delete().whereIn('slug', payload.permissions)
     return await Permission.query().select(['slug', 'title'])
+  }
+
+  public async disablePermissions({ request }: HttpContext) {
+    const { permissions } = await request.validateUsing(disablePermissionsValidator)
+    await db.rawQuery(`
+      UPDATE permissions AS r
+      SET allowed = u.allowed
+      FROM (VALUES ${permissions.map((r) => `('${r.permission}', ${r.status})`).join(', ')}) AS u(slug, allowed)
+      WHERE r.slug = u.slug
+    `)
+    return await Permission.all()
   }
 
   public async getUsers() {
