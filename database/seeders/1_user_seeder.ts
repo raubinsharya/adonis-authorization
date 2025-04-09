@@ -15,6 +15,7 @@ export default class UserSeeder extends BaseSeeder {
       {
         id: 2,
         firstName: 'Admin',
+        lastName: 'Admin',
         status: 'active',
         email: 'admin@gmail.com',
         password: '12345678',

@@ -4,7 +4,7 @@ import { FieldContext } from '@vinejs/vine/types'
 
 function rootAdminProtector(value: unknown, _: unknown, field: FieldContext) {
   if (Array.isArray(value) && value.includes('root_admin'))
-    field.report('root_admin cannot be deleted!', 'root_admin', field)
+    field.report('root_admin cannot be proceed!', 'root_admin', field)
 }
 
 export const deleteRoleValidator = vine.compile(

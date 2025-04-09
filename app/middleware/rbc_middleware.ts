@@ -21,7 +21,7 @@ export default class UserScopeMiddleware {
     // roles
     if (Array.isArray(options.roles) && options.roles.length > 0) {
       const hasAllRoles = await ctx.auth.user!.hasAllRoles(...options.roles)
-      const isActive = (await ctx.auth.user.roles()).every((role) => !!role.allowed)
+      const isActive = (await ctx.auth.user.roles()).every((role) => role.allowed)
       if (!hasAllRoles || !isActive) return ctx.response.forbidden(forbiddenError)
     }
     // permissions

@@ -10,17 +10,20 @@ import { AclModel, RoleInterface } from '@holoyan/adonisjs-permissions/types'
 import db from '@adonisjs/lucid/services/db'
 import { disableRoleValidator } from '#validators/acl/roles_status_validator'
 import { disablePermissionsValidator } from '#validators/acl/permissions_status_validator'
-
+import { userStatusValidator } from '#validators/acl/user_status_validator'
+import { removePermissionsValidator } from '#validators/acl/remove_permissions_validator'
 
 export default class AdminController {
   public async getAllRole() {
-    const roles = await Role.query().select('id', 'slug', 'title')
+    const roles = await Role.query()
+      .select('id', 'slug', 'title', 'allowed', 'scope')
+      .whereNot('id', 1)
     return roles
   }
   public async getRole({ request }: HttpContext) {
     const role = await Role.query()
       .where('id', request.param('id'))
-      .select('id', 'slug', 'title')
+      .select('id', 'slug', 'title', 'allowed')
       .first()
     return role
   }
@@ -53,9 +56,9 @@ export default class AdminController {
     const payload = await request.validateUsing(addRolePermissionValidator)
     const role = (await Acl.role()
       .query()
-      .where('slug', request.param('id'))
+      .where('id', request.param('id'))
       .first()) as RoleInterface
-    if (!role) return response.json({ errors: [{ message: 'Role Not Found!' }] })
+    if (!role) return response.status(404).json({ errors: [{ message: 'Role Not Found!' }] })
     await Acl.role(role).revokeAllPermissions(payload.permissions)
     return await Acl.role(role).permissions()
   }
@@ -77,17 +80,19 @@ export default class AdminController {
       FROM (VALUES ${roles.map((r) => `('${r.role}', ${r.status})`).join(', ')}) AS u(slug, allowed)
       WHERE r.slug = u.slug
     `)
-    return await Role.all()
+    return await Role.query().whereNot('id', 1)
   }
 
   public async getAllPermissions({}: HttpContext) {
-    const roles = await Permission.query().select('id', 'slug', 'title')
+    const roles = await Permission.query()
+      .select('id', 'slug', 'title', 'scope', 'allowed')
+      .whereNot('id', 1)
     return roles
   }
   public async getPermission({ request }: HttpContext) {
     const role = await Permission.query()
       .where('id', request.param('id'))
-      .select('id', 'slug', 'title')
+      .select('id', 'slug', 'title', 'scope', 'allowed')
       .first()
     return role
   }
@@ -99,7 +104,7 @@ export default class AdminController {
   public async deletePermissions({ request }: HttpContext) {
     const payload = await request.validateUsing(deletePermissionsValidator)
     await Permission.query().delete().whereIn('slug', payload.permissions)
-    return await Permission.query().select(['slug', 'title'])
+    return await Permission.query()
   }
 
   public async disablePermissions({ request }: HttpContext) {
@@ -144,14 +149,14 @@ export default class AdminController {
     return await Acl.model(user).roles()
   }
   public async addUserPermissions({ request, response }: HttpContext) {
-    const payload = await request.validateUsing(deletePermissionsValidator)
+    const payload = await request.validateUsing(removePermissionsValidator)
     const user = (await User.find(request.param('id'))) as AclModel
     if (!user) return response.json({ errors: [{ message: 'User Not Found!' }] })
     return await Acl.model(user).assignDirectAllPermissions(payload.permissions)
   }
 
   public async updateUserPermissions({ request, response }: HttpContext) {
-    const payload = await request.validateUsing(deletePermissionsValidator)
+    const payload = await request.validateUsing(removePermissionsValidator)
     const user = (await User.find(request.param('id'))) as AclModel
     if (!user) return response.json({ errors: [{ message: 'User Not Found!' }] })
     await Acl.model(user).syncPermissions(payload.permissions)
@@ -165,10 +170,19 @@ export default class AdminController {
     return await Acl.model(user).roles()
   }
   public async deleteUserPermissions({ request, response }: HttpContext) {
-    const payload = await request.validateUsing(deletePermissionsValidator)
+    const payload = await request.validateUsing(removePermissionsValidator)
     const user = (await User.find(request.param('id'))) as AclModel
     if (!user) return response.json({ errors: [{ message: 'User Not Found!' }] })
     await Acl.model(user).revokeAllPermissions(payload.permissions)
     return await Acl.model(user).permissions()
+  }
+  public async updateUserStatus({ request, response }: HttpContext) {
+    const { status } = await request.validateUsing(userStatusValidator)
+    const user = await User.query()
+      .where('id', request.param('id'))
+      .update('status', status)
+      .whereNot('id', 1)
+    if (!user) return response.json({ errors: [{ message: 'User Not Found!' }] })
+    return user
   }
 }

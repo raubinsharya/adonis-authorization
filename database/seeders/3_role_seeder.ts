@@ -14,11 +14,6 @@ export default class RoleSeeder extends BaseSeeder {
         slug: 'admin',
         id: '2',
       },
-      {
-        title: 'role_admin',
-        slug: 'role_admin',
-        id: '3',
-      },
     ])
   }
 }
