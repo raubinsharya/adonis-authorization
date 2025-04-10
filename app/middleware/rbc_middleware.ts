@@ -9,28 +9,63 @@ declare module '@adonisjs/core/http' {
   }
 }
 
+type MiddlewareOptions = {
+  anyRoles?: string[]
+  allRoles?: string[]
+  exceptRoles?: string[]
+  anyPermissions?: string[]
+  allPermissions?: string[]
+  exceptPermissions?: string[]
+}
+
 export default class UserScopeMiddleware {
-  async handle(
-    ctx: HttpContext,
-    next: NextFn,
-    options: { permissions?: Array<string>; roles?: Array<string> } = {}
-  ) {
-    if (!ctx.auth?.user) return ctx.response.unauthorized(unauthError)
-    if (await ctx.auth?.user?.hasRole('root_admin')) return await next()
+  async handle(ctx: HttpContext, next: NextFn, options: MiddlewareOptions = {}) {
+    const user = ctx.auth?.user
+    if (!user) return ctx.response.unauthorized(unauthError)
 
-    // roles
-    if (Array.isArray(options.roles) && options.roles.length > 0) {
-      const hasAllRoles = await ctx.auth.user!.hasAllRoles(...options.roles)
-      const isActive = (await ctx.auth.user.roles()).every((role) => role.allowed)
-      if (!hasAllRoles || !isActive) return ctx.response.forbidden(forbiddenError)
-    }
-    // permissions
-    if (Array.isArray(options.permissions) && options.permissions.length > 0) {
-      const hasAllPermissions = await ctx.auth.user!.hasAllPermissions(options.permissions)
-      if (!hasAllPermissions) return ctx.response.forbidden(forbiddenError)
+    if ((await user.hasRole('root_admin')) || (await user.hasPermission('root_admin')))
+      return await next()
+
+    const userRoles = await user.roles()
+    const userRoleNames = userRoles.map((role) => role.slug)
+    const allRolesActive = userRoles.every((role) => !!role.allowed)
+
+    // EXCEPT ROLES
+    if (options.exceptRoles?.length) {
+      const hasAnyExcludedRole = options.exceptRoles.some((r) => userRoleNames.includes(r))
+      if (hasAnyExcludedRole) return ctx.response.forbidden(forbiddenError)
     }
 
-    const output = await next()
-    return output
+    // ANY ROLES
+    if (options.anyRoles?.length) {
+      const hasAnyRole = options.anyRoles.some((r) => userRoleNames.includes(r))
+      if (!hasAnyRole || !allRolesActive) return ctx.response.forbidden(forbiddenError)
+    }
+
+    // ALL ROLES
+    if (options.allRoles?.length) {
+      const hasAllRoles = options.allRoles.every((r) => userRoleNames.includes(r))
+      if (!hasAllRoles || !allRolesActive) return ctx.response.forbidden(forbiddenError)
+    }
+
+    // EXCEPT PERMISSIONS
+    if (options.exceptPermissions?.length) {
+      const hasAnyExcludedPermission = await user.hasAnyPermission(options.exceptPermissions)
+      if (hasAnyExcludedPermission) return ctx.response.forbidden(forbiddenError)
+    }
+
+    // ANY PERMISSIONS
+    if (options.anyPermissions?.length) {
+      const hasAnyPerm = await user.hasAnyPermission(options.anyPermissions)
+      if (!hasAnyPerm) return ctx.response.forbidden(forbiddenError)
+    }
+
+    // ALL PERMISSIONS
+    if (options.allPermissions?.length) {
+      const hasAllPerms = await user.hasAllPermissions(options.allPermissions)
+      if (!hasAllPerms) return ctx.response.forbidden(forbiddenError)
+    }
+
+    return await next()
   }
 }

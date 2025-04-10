@@ -115,6 +115,7 @@ export default class AdminController {
       FROM (VALUES ${permissions.map((r) => `('${r.permission}', ${r.status})`).join(', ')}) AS u(slug, allowed)
       WHERE r.slug = u.slug
     `)
+    // Permission.updateOrCreateMany('slug', [{ allowed: false, slug: '' }])
     return await Permission.all()
   }
 
