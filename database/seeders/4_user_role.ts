@@ -4,7 +4,7 @@ import { Acl } from '@holoyan/adonisjs-permissions'
 
 export default class UserRoleSeeder extends BaseSeeder {
   async run() {
-    const root_admin_user = await User.find(1) as User;
-    await Acl.model(root_admin_user).assignAllRoles('root_admin')
+    const rootAdminUser = (await User.find(1)) as User
+    await Acl.model(rootAdminUser).assignAllRoles('root_admin')
   }
 }

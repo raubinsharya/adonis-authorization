@@ -1,5 +1,5 @@
-import AdminController from '#controllers/admin_controller'
-import AuthController from '#controllers/auth_controller'
+const AdminController = () => import('#controllers/admin_controller')
+const AuthController = () => import('#controllers/auth_controller')
 import router from '@adonisjs/core/services/router'
 import { middleware } from './kernel.js'
 
@@ -17,6 +17,18 @@ router
       })
       .prefix('user')
       .use(middleware.auth())
+    router
+      .group(() => {
+        router.get('roles', [AuthController, 'getRoles'])
+      })
+      .prefix('user')
+      .use(middleware.auth())
+    router
+      .group(() => {
+        router.get('permissions', [AuthController, 'getPermissions'])
+      })
+      .prefix('user')
+      .use(middleware.auth())
 
     // ACL
     router
@@ -30,7 +42,7 @@ router
           .use(middleware.acl({ permissions: ['view_role'] }))
         router
           .get('roles/:id/permissions', [AdminController, 'getRolePermissions'])
-          .use(middleware.acl({ permissions: ['view_roles'] }))
+          .use(middleware.acl({ permissions: ['view_role_permissions'] }))
         router
           .post('roles/:id/permissions', [AdminController, 'addRolePermissions'])
           .use(middleware.acl({ permissions: ['add_role_permissions'] }))
@@ -39,7 +51,7 @@ router
           .use(middleware.acl({ permissions: ['add_role_permissions'] }))
         router
           .delete('roles/:id/permissions', [AdminController, 'deleteRolePermissions'])
-          .use(middleware.acl({ permissions: ['add_role_permissions'] }))
+          .use(middleware.acl({ permissions: ['remove_role_permissions'] }))
         router
           .post('roles', [AdminController, 'createRoles'])
           .use(middleware.acl({ permissions: ['create_roles'] }))
@@ -48,7 +60,7 @@ router
           .use(middleware.acl({ permissions: ['delete_roles'] }))
         router
           .patch('roles', [AdminController, 'disableRoles'])
-          .use(middleware.acl({ permissions: ['disable_roles'] }))
+          .use(middleware.acl({ permissions: ['update_roles_status'] }))
         // Permission
         router
           .get('permissions', [AdminController, 'getAllPermissions'])
@@ -64,7 +76,7 @@ router
           .use(middleware.acl({ permissions: ['delete_permissions'] }))
         router
           .patch('permissions', [AdminController, 'disablePermissions'])
-          .use(middleware.acl({ permissions: ['disable_permissions'] }))
+          .use(middleware.acl({ permissions: ['update_permissions_status'] }))
         // Users
         router
           .get('users', [AdminController, 'getUsers'])
@@ -83,6 +95,9 @@ router
           .use(middleware.acl({ permissions: ['update_user_roles'] }))
         router
           .get('users/:id/permissions', [AdminController, 'getUserPermissions'])
+          .use(middleware.acl({ permissions: ['view_user_permissions'] }))
+        router
+          .post('users/:id/permissions', [AdminController, 'addUserPermissions'])
           .use(middleware.acl({ permissions: ['add_user_permissions'] }))
         router
           .put('users/:id/permissions', [AdminController, 'updateUserPermissions'])
@@ -93,6 +108,9 @@ router
         router
           .delete('users/:id/permissions', [AdminController, 'deleteUserPermissions'])
           .use(middleware.acl({ permissions: ['delete_user_permissions'] }))
+        router
+          .patch('users/:id/status', [AdminController, 'updateUserStatus'])
+          .use(middleware.acl({ permissions: ['update_user_status'] }))
       })
       .prefix('admin')
       .use([middleware.auth()])

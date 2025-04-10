@@ -38,11 +38,18 @@ export default class AuthController {
     const token = await User.accessTokens.create(user, ['*'], { expiresIn: '24hr' })
     return {
       token: token.value!.release(),
-      user: user
+      user: user,
     }
   }
 
   public async getProfile({ auth }: HttpContext) {
     return auth.user
+  }
+  public async getRoles({ auth }: HttpContext) {
+    return auth.user?.roles()
+  }
+
+  public async getPermissions({ auth }: HttpContext) {
+    return auth.user?.permissions()
   }
 }

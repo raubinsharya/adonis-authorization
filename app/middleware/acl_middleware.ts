@@ -9,10 +9,7 @@ declare module '@adonisjs/core/http' {
 }
 
 export default class UserScopeMiddleware {
-  async handle(
-    ctx: HttpContext,
-    next: NextFn,
-  ) {
+  async handle(ctx: HttpContext, next: NextFn) {
     const scope = new Scope()
     ctx.acl = new AclManager(true).scope(scope)
 
