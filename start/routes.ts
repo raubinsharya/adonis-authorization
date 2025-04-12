@@ -62,9 +62,11 @@ router
           .patch('roles', [AdminController, 'disableRoles'])
           .use(middleware.acl({ allPermissions: ['update_roles_status'] }))
         // Permission
-        router
-          .get('permissions', [AdminController, 'getAllPermissions'])
-          .use(middleware.acl({ anyPermissions: ['view_permissions', 'add_user_permissions'] }))
+        router.get('permissions', [AdminController, 'getAllPermissions']).use(
+          middleware.acl({
+            anyPermissions: ['view_permissions', 'add_user_permissions', 'add_role_permissions'],
+          })
+        )
         router
           .get('permissions/:id', [AdminController, 'getPermission'])
           .use(middleware.acl({ allPermissions: ['view_permission'] }))
