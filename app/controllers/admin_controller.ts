@@ -12,7 +12,6 @@ import { disableRoleValidator } from '#validators/acl/roles_status_validator'
 import { disablePermissionsValidator } from '#validators/acl/permissions_status_validator'
 import { userStatusValidator } from '#validators/acl/user_status_validator'
 import { removePermissionsValidator } from '#validators/acl/remove_permissions_validator'
-
 export default class AdminController {
   public async getAllRole() {
     const roles = await Role.query()
@@ -64,7 +63,7 @@ export default class AdminController {
   }
   public async createRoles({ request }: HttpContext) {
     const payload = await request.validateUsing(createRoleValidator)
-    return Role.fetchOrCreateMany('slug', payload.roles)
+    return Role.fetchOrCreateMany('title', payload.roles)
   }
   public async deleteRoles({ request }: HttpContext) {
     const payload = await request.validateUsing(deleteRoleValidator)
@@ -83,7 +82,7 @@ export default class AdminController {
     return await Role.query().whereNot('id', 1)
   }
 
-  public async getAllPermissions({}: HttpContext) {
+  public async getAllPermissions() {
     const roles = await Permission.query()
       .select('id', 'slug', 'title', 'scope', 'allowed')
       .whereNot('id', 1)
@@ -99,7 +98,7 @@ export default class AdminController {
 
   public async createPermissions({ request }: HttpContext) {
     const payload = await request.validateUsing(createPermissionValidator)
-    return Permission.fetchOrCreateMany('slug', payload.permissions)
+    return Permission.fetchOrCreateMany('title', payload.permissions)
   }
   public async deletePermissions({ request }: HttpContext) {
     const payload = await request.validateUsing(deletePermissionsValidator)
@@ -115,7 +114,7 @@ export default class AdminController {
       FROM (VALUES ${permissions.map((r) => `('${r.permission}', ${r.status})`).join(', ')}) AS u(slug, allowed)
       WHERE r.slug = u.slug
     `)
-    return await Permission.all()
+    return await Permission.query().whereNot('id', 1)
   }
 
   public async getUsers() {
@@ -178,10 +177,16 @@ export default class AdminController {
   }
   public async updateUserStatus({ request, response }: HttpContext) {
     const { status } = await request.validateUsing(userStatusValidator)
-    const user = await User.query()
+    const user: User = await User.query()
       .where('id', request.param('id'))
       .update('status', status)
       .whereNot('id', 1)
+      .first()
+    await db
+      .from('auth_access_tokens')
+      .where('tokenable_id', request.param('id'))
+      .whereNot('tokenable_id', 1)
+      .delete()
     if (!user) return response.json({ errors: [{ message: 'User Not Found!' }] })
     return user
   }

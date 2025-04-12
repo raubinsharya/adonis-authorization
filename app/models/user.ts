@@ -56,5 +56,5 @@ export default class User
     return [this.firstName, this.middleName, this.lastName].filter(Boolean).join(' ')
   }
 
-  static accessTokens = DbAccessTokensProvider.forModel(User)
+  static readonly accessTokens = DbAccessTokensProvider.forModel(User)
 }
