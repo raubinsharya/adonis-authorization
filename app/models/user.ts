@@ -4,8 +4,9 @@ import { compose } from '@adonisjs/core/helpers'
 import { BaseModel, column, computed } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
-import { hasPermissions, MorphMap } from '@holoyan/adonisjs-permissions'
-import { AclModelInterface } from '@holoyan/adonisjs-permissions/types'
+import { AclModelInterface } from '../../packages/src/types.js'
+import { hasPermissions } from '../../packages/src/mixins/has_permissions.js'
+import { MorphMap } from '../../packages/src/decorators.js'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email', 'mobile'],

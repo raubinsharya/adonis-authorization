@@ -60,12 +60,12 @@
     "@adonisjs/shield": "^8.1.2",
     "@adonisjs/static": "^1.1.1",
     "@adonisjs/vite": "^4.0.0",
-    "@holoyan/adonisjs-permissions": "^1.0.5",
     "@vinejs/vine": "^3.0.0",
     "edge.js": "^6.2.1",
     "luxon": "^3.5.0",
     "pg": "^8.13.3",
-    "reflect-metadata": "^0.2.2"
+    "reflect-metadata": "^0.2.2",
+    "uuid": "^10.0.0"
   },
   "hotHook": {
     "boundaries": [
