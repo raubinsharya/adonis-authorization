@@ -121,7 +121,7 @@ router
   .prefix('api/v1')
 
 User.find(2).then((user) => {
-  user?.roles().then((permissions) => {
+  user?.permissions().then((permissions) => {
     console.info(permissions.map((p) => p.slug))
   })
 })

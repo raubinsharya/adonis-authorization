@@ -5,13 +5,15 @@ import { createRoleValidator } from '#validators/acl/create_roles_validator'
 import { deletePermissionsValidator } from '#validators/acl/delete_permissions_validator'
 import { deleteRoleValidator } from '#validators/acl/delete_roles_validator'
 import type { HttpContext } from '@adonisjs/core/http'
-import { Acl, Permission, Role } from '@holoyan/adonisjs-permissions'
-import { AclModel, RoleInterface } from '@holoyan/adonisjs-permissions/types'
 import db from '@adonisjs/lucid/services/db'
 import { disableRoleValidator } from '#validators/acl/roles_status_validator'
 import { disablePermissionsValidator } from '#validators/acl/permissions_status_validator'
 import { userStatusValidator } from '#validators/acl/user_status_validator'
 import { removePermissionsValidator } from '#validators/acl/remove_permissions_validator'
+import Role from '../../packages/src/models/role.js'
+import { AclModel, RoleInterface } from '../../packages/src/types.js'
+import { Acl } from '../../packages/src/acl.js'
+import Permission from '../../packages/src/models/permission.js'
 export default class AdminController {
   public async getAllRole() {
     const roles = await Role.query()

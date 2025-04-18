@@ -16,7 +16,6 @@ export function hasPermissions() {
        * returns list of roles assigned to the model
        */
       roles() {
-        console.info('here we go yes yes')
         return Acl.model(this as unknown as AclModel).roles()
       }
 
@@ -77,7 +76,6 @@ export function hasPermissions() {
        * @param includeForbiddings
        */
       permissions(includeForbiddings: boolean = false) {
-        console.info('here we go yes yess')
         return Acl.model(this as unknown as AclModel).permissions(includeForbiddings)
       }
 

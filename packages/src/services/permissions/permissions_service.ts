@@ -562,6 +562,10 @@ export default class PermissionsService extends BaseService {
         q.leftJoin(this.modelRoleTable + ' as mr', (joinQuery) => {
           joinQuery.onVal('mr.model_type', modelType).onVal('mr.model_id', modelId)
         })
+        q.leftJoin('roles as ro', 'ro.id', '=', 'mr.role_id').whereRaw(`
+          (mp.model_type != 'roles' OR ro.allowed = true)
+        `)
+
         if (conditions.throughRoles) {
           q.whereRaw('mr.role_id=mp.model_id').where('mp.model_type', 'roles')
           // q.whereRaw('CAST(mr.role_id AS CHAR)=mp.model_id').where('mp.model_type', 'roles')

@@ -74,7 +74,7 @@ export default class RolesService extends BaseService {
     let { slugs, ids } = this.formatList(roles)
 
     if (slugs.length) {
-      rolesQuery.whereIn(this.roleTable + '.slug', slugs)
+      rolesQuery.whereIn(this.roleTable + '.slug', slugs).where('allowed', true)
     }
 
     if (ids.length) {
@@ -93,7 +93,7 @@ export default class RolesService extends BaseService {
 
     let { slugs, ids } = this.formatList(roles)
     if (slugs.length) {
-      rolesQuery.whereIn(this.roleTable + '.slug', slugs)
+      rolesQuery.whereIn(this.roleTable + '.slug', slugs).where('allowed', true)
     }
 
     if (ids.length) {
