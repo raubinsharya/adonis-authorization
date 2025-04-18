@@ -65,7 +65,7 @@ export default class AdminController {
   }
   public async createRoles({ request }: HttpContext) {
     const payload = await request.validateUsing(createRoleValidator)
-    return Role.fetchOrCreateMany('title', payload.roles)
+    return Role.fetchOrCreateMany('slug', payload.roles)
   }
   public async deleteRoles({ request }: HttpContext) {
     const payload = await request.validateUsing(deleteRoleValidator)
@@ -100,7 +100,7 @@ export default class AdminController {
 
   public async createPermissions({ request }: HttpContext) {
     const payload = await request.validateUsing(createPermissionValidator)
-    return Permission.fetchOrCreateMany('title', payload.permissions)
+    return Permission.fetchOrCreateMany('slug', payload.permissions)
   }
   public async deletePermissions({ request }: HttpContext) {
     const payload = await request.validateUsing(deletePermissionsValidator)

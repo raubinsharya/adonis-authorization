@@ -1,5 +1,5 @@
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
-import { Permission } from '@holoyan/adonisjs-permissions'
+import Permission from '../../packages/src/models/permission.js'
 
 export const permissions: Array<string> = [
   'root_admin',
@@ -32,11 +32,10 @@ export const permissions: Array<string> = [
 export default class PermissionSeeder extends BaseSeeder {
   async run() {
     await Permission.updateOrCreateMany(
-      'id',
-      permissions.map((permission, idx) => ({
+      'slug',
+      permissions.map((permission) => ({
         title: permission,
         slug: permission,
-        id: String(idx + 1),
       }))
     )
   }

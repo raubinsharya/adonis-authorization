@@ -1,6 +1,6 @@
 import User from '#models/user'
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
-import { Acl } from '@holoyan/adonisjs-permissions'
+import { Acl } from '../../packages/src/acl.js'
 
 export default class UserRoleSeeder extends BaseSeeder {
   async run() {

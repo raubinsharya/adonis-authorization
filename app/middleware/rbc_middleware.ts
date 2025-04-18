@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { NextFn } from '@adonisjs/core/types/http'
-import { AclManager } from '@holoyan/adonisjs-permissions'
 import { forbiddenError, unauthError } from '../../constant/response.js'
+import { AclManager } from '../../packages/src/acl.js'
 
 declare module '@adonisjs/core/http' {
   export interface HttpContext {

@@ -2,7 +2,6 @@ const AdminController = () => import('#controllers/admin_controller')
 const AuthController = () => import('#controllers/auth_controller')
 import router from '@adonisjs/core/services/router'
 import { middleware } from './kernel.js'
-import User from '#models/user'
 
 router
   .group(() => {
@@ -119,9 +118,3 @@ router
       .use([middleware.auth()])
   })
   .prefix('api/v1')
-
-User.find(2).then((user) => {
-  user?.permissions().then((permissions) => {
-    console.info(permissions.map((p) => p.slug))
-  })
-})
