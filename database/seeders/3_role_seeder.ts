@@ -1,18 +1,16 @@
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
-import { Role } from '@holoyan/adonisjs-permissions'
+import Role from '../../packages/src/models/role.js'
 
 export default class RoleSeeder extends BaseSeeder {
   async run() {
-    await Role.updateOrCreateMany('id', [
+    await Role.updateOrCreateMany('slug', [
       {
         title: 'root_admin',
         slug: 'root_admin',
-        id: '1',
       },
       {
         title: 'admin',
         slug: 'admin',
-        id: '2',
       },
     ])
   }

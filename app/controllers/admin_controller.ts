@@ -5,13 +5,18 @@ import { createRoleValidator } from '#validators/acl/create_roles_validator'
 import { deletePermissionsValidator } from '#validators/acl/delete_permissions_validator'
 import { deleteRoleValidator } from '#validators/acl/delete_roles_validator'
 import type { HttpContext } from '@adonisjs/core/http'
-import { Acl, Permission, Role } from '@holoyan/adonisjs-permissions'
-import { AclModel, RoleInterface } from '@holoyan/adonisjs-permissions/types'
 import db from '@adonisjs/lucid/services/db'
 import { disableRoleValidator } from '#validators/acl/roles_status_validator'
 import { disablePermissionsValidator } from '#validators/acl/permissions_status_validator'
 import { userStatusValidator } from '#validators/acl/user_status_validator'
 import { removePermissionsValidator } from '#validators/acl/remove_permissions_validator'
+import Role from '../../packages/src/models/role.js'
+import { AclModel, RoleInterface } from '../../packages/src/types.js'
+import { Acl } from '../../packages/src/acl.js'
+import Permission from '../../packages/src/models/permission.js'
+import { signupValidator } from '#validators/auth/signup_validator'
+import { createUserValidator } from '#validators/auth/create_user_validator'
+import { deleteUsersValidator } from '#validators/auth/delete_users_validator'
 export default class AdminController {
   public async getAllRole() {
     const roles = await Role.query()
@@ -63,7 +68,7 @@ export default class AdminController {
   }
   public async createRoles({ request }: HttpContext) {
     const payload = await request.validateUsing(createRoleValidator)
-    return Role.fetchOrCreateMany('title', payload.roles)
+    return Role.fetchOrCreateMany('slug', payload.roles)
   }
   public async deleteRoles({ request }: HttpContext) {
     const payload = await request.validateUsing(deleteRoleValidator)
@@ -98,7 +103,7 @@ export default class AdminController {
 
   public async createPermissions({ request }: HttpContext) {
     const payload = await request.validateUsing(createPermissionValidator)
-    return Permission.fetchOrCreateMany('title', payload.permissions)
+    return Permission.fetchOrCreateMany('slug', payload.permissions)
   }
   public async deletePermissions({ request }: HttpContext) {
     const payload = await request.validateUsing(deletePermissionsValidator)
@@ -189,5 +194,14 @@ export default class AdminController {
       .delete()
     if (!user) return response.json({ errors: [{ message: 'User Not Found!' }] })
     return user
+  }
+
+  public async createUser({ request }: HttpContext) {
+    const payload = await request.validateUsing(createUserValidator)
+    return await User.create(payload)
+  }
+  public async deleteUsers({ request }: HttpContext) {
+    const { userIds } = await request.validateUsing(deleteUsersValidator)
+    return await User.query().whereIn('id', userIds).delete()
   }
 }

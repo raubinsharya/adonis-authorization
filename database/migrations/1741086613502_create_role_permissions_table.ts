@@ -4,8 +4,7 @@ import config from '@adonisjs/core/services/config'
 export default class extends BaseSchema {
   async up() {
     this.schema.createTable('permissions', (table) => {
-      this.primaryKey(table, 'id')
-
+      table.increments('id')
       table.string('slug')
       table.string('title').nullable()
       table.string('entity_type').defaultTo('*')
@@ -24,8 +23,7 @@ export default class extends BaseSchema {
     })
 
     this.schema.createTable('roles', (table) => {
-      this.primaryKey(table, 'id')
-
+      table.increments('id')
       table.string('slug')
       table.string('title').nullable()
       table.string('entity_type').defaultTo('*')

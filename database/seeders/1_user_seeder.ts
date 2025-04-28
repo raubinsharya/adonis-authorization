@@ -3,9 +3,8 @@ import User from '#models/user'
 
 export default class UserSeeder extends BaseSeeder {
   async run() {
-    await User.updateOrCreateMany('id', [
+    await User.createMany([
       {
-        id: 1,
         firstName: 'Root',
         lastName: 'Admin',
         status: 'active',
@@ -13,7 +12,6 @@ export default class UserSeeder extends BaseSeeder {
         password: '12345678',
       },
       {
-        id: 2,
         firstName: 'Admin',
         lastName: 'Admin',
         status: 'active',

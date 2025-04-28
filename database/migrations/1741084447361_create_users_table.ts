@@ -13,7 +13,7 @@ export default class extends BaseSchema {
       table.string('mobile', 254).nullable().unique()
       table.string('password').notNullable()
       table.enum('status', ['unauth', 'active', 'deactive', 'block']).defaultTo('unauth')
-      
+
       table.timestamp('created_at').notNullable()
       table.timestamp('updated_at').nullable()
     })

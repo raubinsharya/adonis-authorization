@@ -34,8 +34,8 @@ export default defineConfig({
     () => import('@adonisjs/static/static_provider'),
     () => import('@adonisjs/lucid/database_provider'),
     () => import('@adonisjs/auth/auth_provider'),
-    () => import('@holoyan/adonisjs-permissions/role_permission_provider'),
-    () => import('@adonisjs/cors/cors_provider')
+    () => import('./packages/providers/role_permission_provider.js'),
+    () => import('@adonisjs/cors/cors_provider'),
   ],
 
   /*
@@ -46,7 +46,12 @@ export default defineConfig({
   | List of modules to import before starting the application.
   |
   */
-  preloads: [() => import('#start/routes'), () => import('#start/kernel'), () => import('#start/events'), ()=> import('#types/events')],
+  preloads: [
+    () => import('#start/routes'),
+    () => import('#start/kernel'),
+    () => import('#start/events'),
+    () => import('#types/events'),
+  ],
 
   /*
   |--------------------------------------------------------------------------

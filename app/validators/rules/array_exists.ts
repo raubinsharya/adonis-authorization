@@ -11,8 +11,8 @@ async function exists(value: unknown, options: Options, field: FieldContext) {
   if (!Array.isArray(value) || value.length === 0) return
 
   // Ensure all elements are strings
-  if (!value.every((item) => typeof item === 'string')) {
-    field.report('All values must be strings', 'exists', field)
+  if (!value.every((item) => typeof item === 'string' || typeof item === 'number')) {
+    field.report('All values must be either of string or number', 'exists', field)
     return
   }
 
