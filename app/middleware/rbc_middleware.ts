@@ -26,26 +26,22 @@ export default class UserScopeMiddleware {
     if ((await user.hasRole('root_admin')) || (await user.hasPermission('root_admin')))
       return await next()
 
-    const userRoles = await user.roles()
-    const userRoleNames = userRoles.map((role) => role.slug)
-    const allRolesActive = userRoles.every((role) => !!role.allowed)
-
     // EXCEPT ROLES
     if (options.exceptRoles?.length) {
-      const hasAnyExcludedRole = options.exceptRoles.some((r) => userRoleNames.includes(r))
+      const hasAnyExcludedRole = await user.hasAnyRole(...options.exceptRoles)
       if (hasAnyExcludedRole) return ctx.response.forbidden(forbiddenError)
     }
 
     // ANY ROLES
     if (options.anyRoles?.length) {
-      const hasAnyRole = options.anyRoles.some((r) => userRoleNames.includes(r))
-      if (!hasAnyRole || !allRolesActive) return ctx.response.forbidden(forbiddenError)
+      const hasAnyRole = await user.hasAnyRole(...options.anyRoles)
+      if (!hasAnyRole) return ctx.response.forbidden(forbiddenError)
     }
 
     // ALL ROLES
     if (options.allRoles?.length) {
-      const hasAllRoles = options.allRoles.every((r) => userRoleNames.includes(r))
-      if (!hasAllRoles || !allRolesActive) return ctx.response.forbidden(forbiddenError)
+      const hasAllRoles = await user.hasAllRoles(...options.allRoles)
+      if (!hasAllRoles) return ctx.response.forbidden(forbiddenError)
     }
 
     // EXCEPT PERMISSIONS

@@ -27,6 +27,8 @@ export const permissions: Array<string> = [
   'update_user_status',
   'view_role_permissions',
   'view_user_permissions',
+  'create_user',
+  'delete_users',
 ]
 
 export default class PermissionSeeder extends BaseSeeder {

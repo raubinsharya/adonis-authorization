@@ -81,8 +81,14 @@ router
           .use(middleware.acl({ allPermissions: ['update_permissions_status'] }))
         // Users
         router
+          .post('user', [AdminController, 'createUser'])
+          .use(middleware.acl({ allPermissions: ['create_user'] }))
+        router
+          .delete('users', [AdminController, 'deleteUsers'])
+          .use(middleware.acl({ allPermissions: ['delete_users'] }))
+        router
           .get('users', [AdminController, 'getUsers'])
-          .use(middleware.acl({ allPermissions: ['view_users'] }))
+          .use(middleware.acl({ anyPermissions: ['view_users', 'delete_users'] }))
         router
           .get('users/:id', [AdminController, 'getUser'])
           .use(middleware.acl({ allPermissions: ['view_user'] }))

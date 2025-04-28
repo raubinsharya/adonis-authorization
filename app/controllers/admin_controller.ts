@@ -14,6 +14,9 @@ import Role from '../../packages/src/models/role.js'
 import { AclModel, RoleInterface } from '../../packages/src/types.js'
 import { Acl } from '../../packages/src/acl.js'
 import Permission from '../../packages/src/models/permission.js'
+import { signupValidator } from '#validators/auth/signup_validator'
+import { createUserValidator } from '#validators/auth/create_user_validator'
+import { deleteUsersValidator } from '#validators/auth/delete_users_validator'
 export default class AdminController {
   public async getAllRole() {
     const roles = await Role.query()
@@ -191,5 +194,14 @@ export default class AdminController {
       .delete()
     if (!user) return response.json({ errors: [{ message: 'User Not Found!' }] })
     return user
+  }
+
+  public async createUser({ request }: HttpContext) {
+    const payload = await request.validateUsing(createUserValidator)
+    return await User.create(payload)
+  }
+  public async deleteUsers({ request }: HttpContext) {
+    const { userIds } = await request.validateUsing(deleteUsersValidator)
+    return await User.query().whereIn('id', userIds).delete()
   }
 }
